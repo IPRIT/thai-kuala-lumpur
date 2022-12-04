@@ -2,10 +2,12 @@ import { pluralize } from '@server/lib';
 import { bot } from '@server/lib/telegram/bot';
 import { channelId } from '@server/const/telegram';
 
-export function notify (length: number, has: boolean, elapsedMs?: number) {
-  const noPlacesTitle = `Места закончились\\. Места были доступны *${formatTime(elapsedMs)}*\\.`;
+export type TimeSlot = string
+
+export function notify (result: TimeSlot[], has: boolean, elapsedMs?: number) {
+  const noPlacesTitle = `Места закончились\\. Места были доступны *${formatElapsed(elapsedMs)}*\\.`;
   // eslint-disable-next-line max-len
-  const hasPlacesTitle = `Есть *${length} ${pluralize(length, 'мест', ['о', 'а', ''])}*\\.`;
+  const hasPlacesTitle = `Есть *${result.length} ${pluralize(result.length, 'мест', ['о', 'а', ''])}*\\.`;
 
   const message = `
   *Произошло изменение\\!*\n\n${has ? hasPlacesTitle : noPlacesTitle}
@@ -15,9 +17,32 @@ export function notify (length: number, has: boolean, elapsedMs?: number) {
 
   if (has) {
     keyboard.push([{
-      text: `Записаться (${length} ${pluralize(length, 'мест', ['о', 'а', ''])})`,
+      text: `Записаться (${result.length} ${pluralize(result.length, 'мест', ['о', 'а', ''])})`,
       url: 'https://my.linistry.com/Customer/ReserveTime?b=127&serviceMenuItemId=1195'
     }]);
+
+    const columns = Math.min(3, result.length);
+    const rows = Math.ceil(result.length / columns);
+
+    for (let i = 0; i < rows; ++i) {
+      const slots = [];
+
+      for (let j = 0; j < columns; ++j) {
+        const index = i * columns + j;
+        const slot = result[index];
+
+        if (!slot) {
+          continue;
+        }
+
+        slots.push({
+          text: formatTime(slot),
+          url: 'https://my.linistry.com/Customer/ReserveTime?b=127&serviceMenuItemId=1195'
+        });
+      }
+
+      keyboard.push(slots);
+    }
   }
 
   return bot.telegram.sendMessage(channelId, message, {
@@ -29,7 +54,7 @@ export function notify (length: number, has: boolean, elapsedMs?: number) {
   });
 }
 
-function formatTime (timeMs?: number) {
+function formatElapsed (timeMs?: number) {
   if (!timeMs) {
     return '';
   }
@@ -37,4 +62,8 @@ function formatTime (timeMs?: number) {
   const seconds = Math.floor(timeMs / 1000);
 
   return `${seconds} ${pluralize(seconds, 'секунд', ['а', 'ы', ''])}`;
+}
+
+function formatTime (time: string) {
+  return new Date(time).toLocaleString('ru-RU', { hour: 'numeric', minute: 'numeric', month: 'short', day: 'numeric' });
 }

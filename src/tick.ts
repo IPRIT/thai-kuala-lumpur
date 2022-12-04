@@ -1,7 +1,6 @@
 import fetch from 'node-fetch';
 import { log } from '@server/lib';
 import { notify } from '@server/lib/telegram/notify';
-import { sendLog } from '@server/lib/telegram';
 
 interface AvailabilityParams {
   startyear: number;
@@ -32,12 +31,12 @@ export async function tick () {
   if (hasPlaces !== newHasPlaces) {
     const elapsed = !newHasPlaces ? Date.now() - lastMs : undefined;
 
-    await notify(result.length, newHasPlaces, elapsed);
+    await notify(result, newHasPlaces, elapsed);
 
     if (newHasPlaces) {
       lastMs = Date.now();
 
-      await sendLog(JSON.stringify(result));
+      // await sendLog(JSON.stringify(result));
     }
 
     hasPlaces = newHasPlaces;
