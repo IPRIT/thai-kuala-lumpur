@@ -4,32 +4,32 @@ import { channelId } from '@server/const/telegram';
 
 export type TimeSlot = string
 
-export function notify (result: TimeSlot[], has: boolean, elapsedMs?: number) {
-  const noPlacesTitle = `Места закончились\\. Места были доступны *${formatElapsed(elapsedMs)}*\\.`;
-  // eslint-disable-next-line max-len
-  const hasPlacesTitle = `Есть *${result.length} ${pluralize(result.length, 'мест', ['о', 'а', ''])}*\\.`;
+export function notify (timeSlots: TimeSlot[], hasStateChanged: boolean, elapsedMs?: number) {
+  const hasSlots = timeSlots.length > 0;
 
-  const message = `
-  *Произошло изменение\\!*\n\n${has ? hasPlacesTitle : noPlacesTitle}
-  `;
+  const noSlotsTitle = `😢 Все слоты разобрали \\(были доступны ${formatElapsed(elapsedMs)}\\)\n`;
+  // eslint-disable-next-line max-len
+  const hasSlotsTitle = `⚡️ ${hasStateChanged ? pluralize(timeSlots.length, 'Появил', ['ся', 'ось', 'ось']) : `Доступность слотов поменялась\n\nСейчас ${pluralize(timeSlots.length, 'доступ', ['ен', 'но', 'ны'])}`}${timeSlots.length === 1 ? ' только' : ''} *${timeSlots.length}${hasStateChanged ? ` ${pluralize(timeSlots.length, 'нов', ['ый', 'ых', 'ых'])}` : ''} ${pluralize(timeSlots.length, 'слот', ['', 'а', 'ов'])}*\\.\n`;
+
+  const message = hasSlots ? hasSlotsTitle : noSlotsTitle;
 
   const keyboard = [];
 
-  if (has) {
+  if (hasSlots) {
     keyboard.push([{
-      text: `Записаться (${result.length} ${pluralize(result.length, 'мест', ['о', 'а', ''])})`,
+      text: `Записаться (${timeSlots.length} ${pluralize(timeSlots.length, 'слот', ['', 'а', 'ов'])})`,
       url: 'https://my.linistry.com/Customer/ReserveTime?b=127&serviceMenuItemId=1195'
     }]);
 
-    const columns = Math.min(3, result.length);
-    const rows = Math.ceil(result.length / columns);
+    const columns = Math.min(3, timeSlots.length);
+    const rows = Math.ceil(timeSlots.length / columns);
 
     for (let i = 0; i < rows; ++i) {
       const slots = [];
 
       for (let j = 0; j < columns; ++j) {
         const index = i * columns + j;
-        const slot = result[index];
+        const slot = timeSlots[index];
 
         if (!slot) {
           continue;

@@ -1,5 +1,6 @@
 import fetch from 'node-fetch';
 import { log } from '@server/lib';
+import type { TimeSlot } from '@server/lib/telegram/notify';
 import { notify } from '@server/lib/telegram/notify';
 
 interface AvailabilityParams {
@@ -15,34 +16,36 @@ const BASE_URI = 'https://my.linistry.com/api/CustomerApi/GetAvailabilityAsync';
 
 const defaultParams = {
   serviceId: '3fb796f6-3829-40b9-a549-3feb2b12453a',
-  count: 1
+  count: 5
 };
 
-let hasPlaces = false;
 let ticks = 0;
 let lastMs = 0;
+let lastSlots: TimeSlot[] = [];
+let lastHasSlots = false;
 
 export async function tick () {
   const params = getAvailabilityParams();
-  const result = await getAvailability(params);
+  const slots = await getAvailability(params);
 
-  const newHasPlaces = result.length > 0;
+  const hasSlots = slots.length > 0;
+  const hasStateChanged = lastHasSlots !== hasSlots;
 
-  if (hasPlaces !== newHasPlaces) {
-    const elapsed = !newHasPlaces ? Date.now() - lastMs : undefined;
+  if (hasStateChanged || isSlotsChanged(slots, lastSlots)) {
+    const elapsed = !hasSlots ? Date.now() - lastMs : undefined;
 
-    await notify(result, newHasPlaces, elapsed);
+    await notify(slots, hasStateChanged, elapsed);
 
-    if (newHasPlaces) {
+    if (hasStateChanged && hasSlots) {
       lastMs = Date.now();
-
-      // await sendLog(JSON.stringify(result));
     }
 
-    hasPlaces = newHasPlaces;
+    lastHasSlots = hasSlots;
   }
 
-  log(`tick: ${ticks++} (${result.length})`);
+  lastSlots = slots;
+
+  log(`tick: ${ticks++} (${slots.length})`);
 }
 
 function getAvailabilityParams (): AvailabilityParams {
@@ -75,6 +78,18 @@ function getLastDate (date: Date) {
   month.setDate(month.getDate() + 6 - month.getDay());
 
   return month;
+}
+
+function isSlotsChanged (slots: TimeSlot[], lastSlots: TimeSlot[]): boolean {
+  const set = new Set(slots);
+  const lastSet = new Set(lastSlots);
+
+  return !setsEqual(set, lastSet);
+}
+
+function setsEqual (xs: Set<string>, ys: Set<string>) {
+  return xs.size === ys.size &&
+    [...xs].every((x) => ys.has(x));
 }
 
 async function getAvailability (params: AvailabilityParams) {
