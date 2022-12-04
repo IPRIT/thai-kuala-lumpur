@@ -20,30 +20,32 @@ const defaultParams = {
 };
 
 let ticks = 0;
-let lastMs = 0;
+let slotsAvailableSinceMs = 0;
 let lastSlots: TimeSlot[] = [];
-let lastHasSlots = false;
+let initialTick = true;
 
 export async function tick () {
   const params = getAvailabilityParams();
   const slots = await getAvailability(params);
 
   const hasSlots = slots.length > 0;
-  const hasStateChanged = lastHasSlots !== hasSlots;
+  const lastHasSlots = lastSlots.length > 0;
 
-  if (hasStateChanged || isSlotsChanged(slots, lastSlots)) {
-    const elapsed = !hasSlots ? Date.now() - lastMs : undefined;
+  const hasStateChanged = lastHasSlots !== hasSlots;
+  const shouldNotify = !initialTick && isSlotsChanged(slots, lastSlots);
+
+  if (shouldNotify) {
+    const elapsed = !hasSlots ? Date.now() - slotsAvailableSinceMs : undefined;
 
     await notify(slots, hasStateChanged, elapsed);
+  }
 
-    if (hasStateChanged && hasSlots) {
-      lastMs = Date.now();
-    }
-
-    lastHasSlots = hasSlots;
+  if (hasStateChanged && hasSlots) {
+    slotsAvailableSinceMs = Date.now();
   }
 
   lastSlots = slots;
+  initialTick = false;
 
   log(`tick: ${ticks++} (${slots.length})`);
 }
