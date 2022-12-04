@@ -1,7 +1,7 @@
 import fetch from 'node-fetch';
-import { channelId } from '@server/const/telegram';
-import { bot } from '@server/lib/telegram/bot';
-import { log, pluralize } from '@server/lib';
+import { log } from '@server/lib';
+import { notify } from '@server/lib/telegram/notify';
+import { sendLog } from '@server/lib/telegram';
 
 interface AvailabilityParams {
   startyear: number;
@@ -20,6 +20,8 @@ const defaultParams = {
 };
 
 let hasPlaces = false;
+let ticks = 0;
+let lastMs = 0;
 
 export async function tick () {
   const params = getAvailabilityParams();
@@ -28,33 +30,20 @@ export async function tick () {
   const newHasPlaces = result.length > 0;
 
   if (hasPlaces !== newHasPlaces) {
-    await notify(result.length, newHasPlaces);
+    const elapsed = !newHasPlaces ? Date.now() - lastMs : undefined;
+
+    await notify(result.length, newHasPlaces, elapsed);
+
+    if (newHasPlaces) {
+      lastMs = Date.now();
+
+      await sendLog(JSON.stringify(result));
+    }
 
     hasPlaces = newHasPlaces;
   }
 
-  log('tick:', result.length);
-}
-
-function notify (length: number, has: boolean) {
-  const noPlacesTitle = 'Места закончились';
-  // eslint-disable-next-line max-len
-  const hasPlacesTitle = `Есть *${length} ${pluralize(length, 'мест', ['о', 'а', ''])}*\\.`;
-
-  const message = `
-  *Произошло изменение\\!*\n\n${has ? hasPlacesTitle : noPlacesTitle}
-  `;
-
-  return bot.telegram.sendMessage(channelId, message, {
-    parse_mode: 'MarkdownV2',
-    disable_web_page_preview: true,
-    reply_markup: {
-      inline_keyboard: [[{
-        text: `Записаться (${length} ${pluralize(length, 'мест', ['о', 'а', ''])})`,
-        url: 'https://my.linistry.com/Customer/ReserveTime?b=127&serviceMenuItemId=1195'
-      }]]
-    }
-  });
+  log(`tick: ${ticks++} (${result.length})`);
 }
 
 function getAvailabilityParams (): AvailabilityParams {

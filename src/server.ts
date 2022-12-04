@@ -4,9 +4,8 @@ import app from '@server/app';
 import http from 'http';
 
 import { logError, onError, onListening, onProcessMessage } from '@server/lib';
-import { tick } from './tick';
-import { bot } from '@server/lib/telegram/bot';
-import { ownerId } from '@server/const/telegram';
+import { sendLog } from '@server/lib/telegram';
+import { tick } from '@server/tick';
 
 export const server = http.createServer(app);
 
@@ -23,7 +22,7 @@ async function start () {
       console.error('Error:', e);
 
       // @ts-ignore
-      await bot.telegram.sendMessage(ownerId, e.message ?? String(e));
+      await sendLog(e.message ?? String(e));
     }
   }
 }
