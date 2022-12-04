@@ -16,7 +16,7 @@ const BASE_URI = 'https://my.linistry.com/api/CustomerApi/GetAvailabilityAsync';
 
 const defaultParams = {
   serviceId: '3fb796f6-3829-40b9-a549-3feb2b12453a',
-  count: 5
+  count: 1
 };
 
 let ticks = 0;
