@@ -9,7 +9,7 @@ export function notify (timeSlots: TimeSlot[], hasStateChanged: boolean, elapsed
 
   const noSlotsTitle = `😢 Все слоты разобрали \\(были доступны ${formatElapsed(elapsedMs)}\\)\n`;
   // eslint-disable-next-line max-len
-  const hasSlotsTitle = `⚡️ ${hasStateChanged ? pluralize(timeSlots.length, 'Появил', ['ся', 'ось', 'ось']) : `Доступность слотов поменялась\\.\n\nСейчас ${pluralize(timeSlots.length, 'доступ', ['ен', 'но', 'ны'])}`}${timeSlots.length === 1 ? ' только' : ''} *${timeSlots.length}${hasStateChanged ? ` ${pluralize(timeSlots.length, 'нов', ['ый', 'ых', 'ых'])}` : ''} ${pluralize(timeSlots.length, 'слот', ['', 'а', 'ов'])}*\\.\n`;
+  const hasSlotsTitle = `⚡️ ${hasStateChanged ? pluralize(timeSlots.length, 'Появил', ['ся', 'ось', 'ось']) : `Доступность слотов поменялась\\.\n\nСейчас ${pluralize(timeSlots.length, 'доступ', ['ен', 'но', 'ны'])}`}${timeSlots.length === 1 && !hasStateChanged ? ' только' : ''} *${timeSlots.length}${hasStateChanged ? ` ${pluralize(timeSlots.length, 'нов', ['ый', 'ых', 'ых'])}` : ''} ${pluralize(timeSlots.length, 'слот', ['', 'а', 'ов'])}*\\.\n`;
 
   const message = hasSlots ? hasSlotsTitle : noSlotsTitle;
 
