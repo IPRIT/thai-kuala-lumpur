@@ -3,7 +3,7 @@ import { bot } from '@server/lib/telegram/bot';
 import { channelId } from '@server/const/telegram';
 
 export function notify (length: number, has: boolean, elapsedMs?: number) {
-  const noPlacesTitle = `Места закончились. Места были доступны *${formatTime(elapsedMs)}*.`;
+  const noPlacesTitle = `Места закончились\\. Места были доступны *${formatTime(elapsedMs)}*\\.`;
   // eslint-disable-next-line max-len
   const hasPlacesTitle = `Есть *${length} ${pluralize(length, 'мест', ['о', 'а', ''])}*\\.`;
 
