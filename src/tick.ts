@@ -66,20 +66,11 @@ function getAvailabilityParams (): AvailabilityParams {
 }
 
 function getFirstDate (date: Date) {
-  const month = new Date(date.getFullYear(), date.getMonth());
-
-  month.setDate(-month.getDay() + 1);
-
-  return month;
+  return new Date(date.getFullYear(), date.getMonth(), date.getDate() - 1);
 }
 
 function getLastDate (date: Date) {
-  const month = new Date(date.getFullYear(), date.getMonth() + 1);
-
-  month.setDate(0);
-  month.setDate(month.getDate() + 6 - month.getDay());
-
-  return month;
+  return new Date(date.getFullYear(), date.getMonth(), date.getDate() + 30);
 }
 
 function isSlotsChanged (slots: TimeSlot[], lastSlots: TimeSlot[]): boolean {
