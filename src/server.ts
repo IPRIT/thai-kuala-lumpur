@@ -15,7 +15,7 @@ server.on('listening', onListening.bind(null, server));
 process.on('message', onProcessMessage);
 
 async function start () {
-  for await (const _ of setInterval(5000)) {
+  for await (const _ of setInterval(1000)) {
     try {
       await tick();
     } catch (e) {
