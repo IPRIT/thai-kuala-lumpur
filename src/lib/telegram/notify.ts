@@ -7,9 +7,9 @@ export type TimeSlot = string
 export function notify (timeSlots: TimeSlot[], hasStateChanged: boolean, elapsedMs?: number) {
   const hasSlots = timeSlots.length > 0;
 
-  const noSlotsTitle = `${getSadEmoji()} Все слоты разобрали \\(были доступны ${formatElapsed(elapsedMs)}\\)\n`;
+  const noSlotsTitle = `${getSadEmoji()} No more slots \\(were available for ${formatElapsed(elapsedMs)}\\)\n`;
   // eslint-disable-next-line max-len
-  const hasSlotsTitle = `${getMessageEmoji()}️ ${hasStateChanged ? pluralize(timeSlots.length, 'Появил', ['ся', 'ось', 'ось']) : `Доступность слотов поменялась\\.\n\nСейчас ${pluralize(timeSlots.length, 'доступ', ['ен', 'но', 'ны'])}`}${timeSlots.length === 1 && !hasStateChanged ? ' только' : ''} *${timeSlots.length}${hasStateChanged ? ` ${pluralize(timeSlots.length, 'нов', ['ый', 'ых', 'ых'])}` : ''} ${pluralize(timeSlots.length, 'слот', ['', 'а', 'ов'])}*\\.\n`;
+  const hasSlotsTitle = `${getMessageEmoji()}️ Time slots have changed\\.\n\n${timeSlots.length === 1 && !hasStateChanged ? 'Only' : ''} *${timeSlots.length}${hasStateChanged ? ' new' : ''} ${pluralize(timeSlots.length, 'slot', ['', 's are', 's are'])} available*\\.\n`;
 
   const message = hasSlots ? hasSlotsTitle : noSlotsTitle;
 
@@ -18,7 +18,7 @@ export function notify (timeSlots: TimeSlot[], hasStateChanged: boolean, elapsed
   if (hasSlots) {
     keyboard.push([{
       // eslint-disable-next-line max-len
-      text: `${getButtonEmoji()}Записаться (${timeSlots.length} ${pluralize(timeSlots.length, 'слот', ['', 'а', 'ов'])})`,
+      text: `${getButtonEmoji()}Book a time (${timeSlots.length} ${pluralize(timeSlots.length, 'slot', ['', 's', 's'])})`,
       url: 'https://my.linistry.com/Customer/ReserveTime?b=127&serviceMenuItemId=1195'
     }]);
 
@@ -62,11 +62,11 @@ function formatElapsed (timeMs?: number) {
 
   const seconds = Math.floor(timeMs / 1000);
 
-  return `${seconds} ${pluralize(seconds, 'секунд', ['у', 'ы', ''])}`;
+  return `${seconds} ${pluralize(seconds, 'second', ['', 's', 's'])}`;
 }
 
 function formatTime (time: string) {
-  return new Date(time).toLocaleString('ru-RU', { hour: 'numeric', minute: 'numeric', month: 'short', day: 'numeric' });
+  return new Date(time).toLocaleString('en-UK', { hour: 'numeric', minute: 'numeric', month: 'short', day: 'numeric' });
 }
 
 function isHappyNewYearTime () {
