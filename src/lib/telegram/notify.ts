@@ -9,7 +9,7 @@ export function notify (timeSlots: TimeSlot[], hasStateChanged: boolean, elapsed
 
   const noSlotsTitle = `${getSadEmoji()} No more slots \\(were available for ${formatElapsed(elapsedMs)}\\)\n`;
   // eslint-disable-next-line max-len
-  const hasSlotsTitle = `${getMessageEmoji()}️ Time slots have changed\\.\n\n${timeSlots.length === 1 && !hasStateChanged ? 'Only' : ''} *${timeSlots.length}${hasStateChanged ? ' new' : ''} ${pluralize(timeSlots.length, 'slot', ['', 's', 's'])}${timeSlots.length > 1 ? ' are' : ''}* available\\.\n`;
+  const hasSlotsTitle = `${getMessageEmoji()}️ Time slots have changed\\.\n\n${timeSlots.length === 1 && !hasStateChanged ? 'Only' : ''} *${timeSlots.length}${hasStateChanged ? ' new' : ''} ${pluralize(timeSlots.length, 'slot', ['', 's', 's'])}*${timeSlots.length > 1 ? ' are' : ''} available\\.\n`;
 
   const message = hasSlots ? hasSlotsTitle : noSlotsTitle;
 
